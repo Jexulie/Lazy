@@ -2,8 +2,9 @@ from checker import Checker
 from spawner import Spawner
 from observer import Observer
 from helper import ParseConfigFile
-from pynput.keyboard import Key, Listener
 import time, threading, logging
+
+# from pynput.keyboard import Key, Listener
 
 CONFIG_PATH = "./lazycfg.json"
 
@@ -74,22 +75,21 @@ class Lazy:
     self.spawner = self.factorySpawner(self.observer, self.execute)
     self.checker = self.factoryChecker(self.observer, self.watch, self.exclude)
 
-  def pressEvent(self, key):
-    print(key)
-    if key == 'r':
-      print('pressed reset')
-      self.restartSpawner()
+  # def pressEvent(self, key):
+  #   print(key)
+  #   if key == 'r':
+  #     print('pressed reset')
+  #     self.restartSpawner()
 
-  def releaseEvent(self, key):
-    print(key)
-    if key == 'r':
-      print('released reset')
-      self.restartSpawner()
+  # def releaseEvent(self, key):
+  #   print(key)
+  #   if key == 'r':
+  #     print('released reset')
+  #     self.restartSpawner()
 
-
-  def startEventLoop(self):
-    with Listener(on_press=self.pressEvent, on_release=self.releaseEvent) as listener:
-      listener.join()
+  # def startEventLoop(self):
+  #   with Listener(on_press=self.pressEvent, on_release=self.releaseEvent) as listener:
+  #     listener.join()
 
 
   def start(self):
@@ -101,8 +101,11 @@ class Lazy:
     self.checker.start()
     self.spawner.start()
     print('Process Started...')
+
+
     while True:
       pass
+
     # self.startEventLoop()
 
 if __name__ == "__main__":

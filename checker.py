@@ -114,6 +114,3 @@ class Checker(threading.Thread):
     while self.status:
       time.sleep(.25)
       self.walkFiles()
-
-      # pp(self.filesToWatch)
-      # print('\n')
