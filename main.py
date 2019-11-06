@@ -1,9 +1,11 @@
 from checker import Checker
 from spawner import Spawner
 from observer import Observer
+from helper import ParseConfigFile
 from pynput.keyboard import Key, Listener
 import time, threading, logging
 
+CONFIG_PATH = "./lazycfg.json"
 
 class Lazy:
 
@@ -13,13 +15,22 @@ class Lazy:
 
   lock = threading.Lock()
 
-  def __init__(self):
-    self.args = {
-      #TODO split cmd after getting CLI args
-      'cmd': ['python', './test/lazyloop.test.py'],
-      'path': './test',
-      'options': None
-    }
+  def __init__(self, config):
+    self.execute = config['execute'].split(" ")
+
+    self.watch = config['watch']
+    self.exclude = config['exclude']
+
+    self.watchDir = config['watch']['dir']
+    self.watchExt = config['watch']['ext']
+
+    self.excludeDir = config['exclude']['dir']
+    self.excludeExt = config['exclude']['dir']
+
+    # self.args = {
+    #   'cmd': ['python', './test/lazyloop.test.py'],
+    #   'path': './test'
+    # }
 
   def feedback(self, flag, data):
     print(f'Feedback from {flag}')
@@ -32,10 +43,6 @@ class Lazy:
     # if flag == 1 or flag == 2 or flag == 3:
     #   if self.spawnerProcess is not None:
     #     self.terminateSpawner()
-
-
-  def handlePath(self):
-    pass
 
   def factoryObserver(self):
     return Observer(self.feedback)
@@ -61,9 +68,11 @@ class Lazy:
     print('Spawner Restarted')
 
   def createNewInstance(self):
+    
+
     self.observer = self.factoryObserver()
-    self.spawner = self.factorySpawner(self.observer, self.args['cmd'])
-    self.checker = self.factoryChecker(self.observer, self.args['path'], self.args['options'])
+    self.spawner = self.factorySpawner(self.observer, self.execute)
+    self.checker = self.factoryChecker(self.observer, self.watch, self.exclude)
 
   def pressEvent(self, key):
     print(key)
@@ -84,19 +93,24 @@ class Lazy:
 
 
   def start(self):
+    # print(self.watch)
+    # print(self.execute)
+    # print(self.exclude)
+
     self.createNewInstance()
     self.checker.start()
     self.spawner.start()
     print('Process Started...')
-    self.startEventLoop()
+    while True:
+      pass
+    # self.startEventLoop()
 
 if __name__ == "__main__":
   # Parse CLI ARGs
   # start checker thread
   # start spawner thread
   # listen for keyboard presses & execute
-
-  # get relative path or ...
-  newInstance = Lazy()
+  config = ParseConfigFile(CONFIG_PATH)
+  newInstance = Lazy(config)
 
   newInstance.start()

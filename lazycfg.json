@@ -1,0 +1,11 @@
+{
+    "watch": {
+        "dir": "./test",
+        "ext": ["py"]
+    },
+    "exclude": {
+        "dir": ["./config"],
+        "ext": ["js", "json", "db"]
+    },
+    "execute": "python ./test/lazyloop.test.py"
+}

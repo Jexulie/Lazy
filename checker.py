@@ -1,4 +1,4 @@
-import os, time, threading
+import os, time, threading, re
 from pprint import pprint as pp
 
 # Observer Flags
@@ -11,9 +11,11 @@ class Checker(threading.Thread):
   status = True
   filesToWatch = []
 
-  def __init__(self, observer, path, options):
-    self.path = path
-    self.options = options
+  def __init__(self, observer, watch, exclude):
+    # self.path = path
+    # self.options = options
+    self.watch = watch
+    self.exclude = exclude
     self.observer = observer
     
     threading.Thread.__init__(self)
@@ -28,6 +30,26 @@ class Checker(threading.Thread):
     elif flag == 3:
       self.observer.update(3, 'file-removed')
 
+  def extractExtension(self, path):
+    matched = re.match(r'^(.*)\.(.*)$', path)
+    ext = matched.group(2)
+    if ext is None:
+      raise Exception
+    else:
+      return ext
+
+  def checkFileExtException(self, path):
+    ext = self.extractExtension(path)
+    if ext in self.exclude['ext']:
+      return True
+
+    return False
+
+  def checkDirExeption(self, directory):
+    if directory in self.exclude['dir']:
+      return True
+
+    return False
 
   def checkFileRemoval(self, nameList):
     temp = []
@@ -40,7 +62,6 @@ class Checker(threading.Thread):
     
     self.filesToWatch = temp
       
-
 
   def checkFileCreated(self, name, size):
     if name not in [file['name'] for file in self.filesToWatch]:
@@ -58,12 +79,18 @@ class Checker(threading.Thread):
 
   def walkFiles(self):
     filesToCheck = []
-
-    for root, dirs, files in os.walk(self.path, topdown=True):
+    for root, dirs, files in os.walk(self.watch['dir'], topdown=True):
       # print(root, dirs, files)
+
+      if self.checkDirExeption(dirs):
+        continue
+
       for name in files:
         filePath = root + '/' + name
         fileSize = os.stat(filePath).st_size
+
+        if self.checkFileExtException(filePath):
+          continue
 
         filesToCheck.append(filePath)
         
